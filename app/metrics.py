@@ -130,6 +130,36 @@ class MetricsProvider:
         except Exception:
             temps = {}
 
+        # uptime
+        try:
+            boot_time = psutil.boot_time()
+            uptime_seconds = time.time() - boot_time
+            
+            # Convert to human readable format
+            days = int(uptime_seconds // 86400)
+            hours = int((uptime_seconds % 86400) // 3600)
+            minutes = int((uptime_seconds % 3600) // 60)
+            
+            # Format uptime string
+            if days > 0:
+                uptime_str = f"{days}d {hours}h {minutes}m"
+            elif hours > 0:
+                uptime_str = f"{hours}h {minutes}m"
+            else:
+                uptime_str = f"{minutes}m"
+            
+            uptime_info = {
+                'seconds': int(uptime_seconds),
+                'formatted': uptime_str,
+                'boot_time': boot_time
+            }
+        except Exception:
+            uptime_info = {
+                'seconds': 0,
+                'formatted': 'Unknown',
+                'boot_time': 0
+            }
+
         return {
             'cpu_percent': cpu,
             'per_core': per_core,
@@ -145,6 +175,7 @@ class MetricsProvider:
             'net_bytes_recv': net_io.bytes_recv,
             'timestamp': time.time(),
             'processes': procs_sorted,
+            'uptime': uptime_info,
         }
 
     def snapshot(self) -> Dict:
